@@ -13,7 +13,7 @@
 const promise = new Promise((resolve, rejected) => {
   setTimeout(() => {
     resolve("Money is returned");
-    rejected("I don't have the money");
+    rejected(new Error("I don't have money"));
   }, 1000);
 });
 
