@@ -1,8 +1,10 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const port = 3000;
 
 app.use(express.json());
+app.use(cors());
 
 const customers = [
   {
@@ -38,20 +40,19 @@ app.get("/customers/:id", (req, res) => {
 });
 
 app.post("/customers", (req, res) => {
-  // if (req.body.name == "" || req.body.id == "")
-  //   res.send("Please provide the name and id");
-
-  if (!req.body.name) res.send("Please provide the name");
+  if (!req.body || !req.body.name) {
+    return res.status(400).send("Please provide the name");
+  }
 
   var customer = {
     id: customers.length + 1,
     name: req.body.name,
-    email: req.body.email,
-    age: req.body.age,
+    email: req.body.email || "",
+    age: req.body.age || null,
   };
 
   customers.push(customer);
-  return res.send(customers);
+  return res.status(201).send(customer);
 });
 
 // give a url to your delete request
@@ -77,6 +78,18 @@ app.put("/customers/:id", (req, res) => {
   customer.email = req.body.email;
   customer.age = req.body.age;
   return res.send(customers);
+});
+
+app.patch("/customers/:id", (req, res) => {
+  const customer = customers.find((c) => c.id === parseInt(req.params.id));
+  if (!customer) return res.status(404).send("Customer not found");
+
+  // Update only the fields that are present in the request body
+  if (req.body.name) customer.name = req.body.name;
+  if (req.body.email) customer.email = req.body.email;
+  if (req.body.age) customer.age = req.body.age;
+
+  return res.send(customer);
 });
 
 app.listen(port, () => {
